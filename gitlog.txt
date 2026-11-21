@@ -1,4 +1,10 @@
-﻿commit 54513025af4cf845fc9e8411677d37ade8e33491
+﻿commit ecf78008508d4cd80756e9f0e96955d68da37db3
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 11:00:27 +0530
+
+    feat: add vercel deployment configuration and serverless support
+
+commit 1913af067033dbfe62a477136d3251e9143dae85
 Author: Rudra152005 <www.rudra152005@gmail.com>
 Date:   2026-11-21 10:12:24 +0530
 
