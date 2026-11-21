@@ -1,4 +1,5 @@
 import { parse } from 'csv-parse/sync';
+import crypto from 'node:crypto';
 
 /**
  * Strips HTML tags from text.
@@ -25,6 +26,15 @@ export function cleanText(text) {
 }
 
 /**
+ * Computes SHA-256 hash of normalised review text for cache keys and deduplication.
+ * @param {string} text 
+ * @returns {string}
+ */
+export function hashText(text) {
+  return crypto.createHash('sha256').update(text || '', 'utf8').digest('hex');
+}
+
+/**
  * Parses and validates star rating.
  * Valid ratings are integers 1 to 5.
  * Invalid ratings (e.g. "", "five", null, undefined) return null.
@@ -44,35 +54,129 @@ export function parseRating(rawRating) {
 }
 
 /**
- * Parses raw CSV content into initial row records with basic sanitisation.
- * Multi-line quoted cells are supported by csv-parse.
+ * Parses raw CSV content into records.
+ * Supports multi-line quoted cells.
  * @param {string|Buffer} csvContent 
  * @returns {Array<object>}
  */
 export function parseCsvRows(csvContent) {
   const content = typeof csvContent === 'string' ? csvContent : csvContent.toString('utf-8');
   
-  const records = parse(content, {
+  return parse(content, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
     relax_quotes: true
   });
+}
 
-  return records.map((record, index) => {
-    const rawText = record.review_text ?? '';
-    const cleanedText = cleanText(rawText);
-    const parsedRating = parseRating(record.rating);
+/**
+ * Full cleaning and deduplication pipeline.
+ * Handles:
+ * - Empty/whitespace-only review text (skipped: empty)
+ * - Missing/non-numeric rating -> null
+ * - HTML stripping & whitespace collapsing
+ * - Duplicate detection via lowercased normalised text
+ * - Data quality summary report
+ * 
+ * @param {string|Buffer} csvContent 
+ * @returns {{
+ *   validReviews: Array<object>,
+ *   duplicateReviews: Array<object>,
+ *   skippedReviews: Array<object>,
+ *   allReviews: Array<object>,
+ *   dataQualityReport: {
+ *     rowsRead: number,
+ *     analysed: number,
+ *     skippedEmpty: number,
+ *     duplicates: number,
+ *     unknownRatings: number
+ *   }
+ * }}
+ */
+export function processReviewsCsv(csvContent) {
+  const rawRows = parseCsvRows(csvContent);
+  const rowsRead = rawRows.length;
 
-    return {
-      review_id: (record.review_id || `ROW_${index + 1}`).trim(),
-      product: (record.product || 'Unknown Product').trim(),
-      rating: parsedRating,
-      raw_rating: record.rating !== undefined ? String(record.rating).trim() : '',
-      date: (record.date || '').trim(),
-      cleaned_text: cleanedText,
-      raw_text: rawText,
-      is_empty: cleanedText.length === 0
+  const validReviews = [];
+  const duplicateReviews = [];
+  const skippedReviews = [];
+  const allReviews = [];
+
+  // Map of normalized lowercased text to original review_id
+  const seenTexts = new Map();
+  let unknownRatingsCount = 0;
+
+  for (let i = 0; i < rawRows.length; i++) {
+    const row = rawRows[i];
+    const reviewId = (row.review_id || `ROW_${i + 1}`).trim();
+    const product = (row.product || 'Unknown Product').trim();
+    const date = (row.date || '').trim();
+    const rawRating = row.rating !== undefined ? String(row.rating).trim() : '';
+    const rating = parseRating(rawRating);
+    const cleaned = cleanText(row.review_text || '');
+    const hash = hashText(cleaned);
+
+    if (rating === null) {
+      unknownRatingsCount++;
+    }
+
+    // Base review item
+    const reviewItem = {
+      review_id: reviewId,
+      product,
+      rating, // number or null
+      raw_rating: rawRating,
+      date,
+      text: cleaned,
+      raw_text: row.review_text || '',
+      hash,
+      is_duplicate: false,
+      duplicate_of: null,
+      status: 'pending', // 'analysed' | 'skipped' | 'duplicate' | 'analysis_failed'
+      skip_reason: null
     };
-  });
+
+    // Case 1: Empty or whitespace-only text
+    if (cleaned.length === 0) {
+      reviewItem.status = 'skipped';
+      reviewItem.skip_reason = 'skipped: empty';
+      skippedReviews.push(reviewItem);
+      allReviews.push(reviewItem);
+      continue;
+    }
+
+    // Case 2: Duplicate detection (lowercased, trimmed, whitespace-collapsed)
+    const normalizedKey = cleaned.toLowerCase();
+    if (seenTexts.has(normalizedKey)) {
+      const originalId = seenTexts.get(normalizedKey);
+      reviewItem.is_duplicate = true;
+      reviewItem.duplicate_of = originalId;
+      reviewItem.status = 'duplicate';
+      duplicateReviews.push(reviewItem);
+      allReviews.push(reviewItem);
+      continue;
+    }
+
+    // Case 3: Valid unique review ready for analysis
+    seenTexts.set(normalizedKey, reviewId);
+    validReviews.push(reviewItem);
+    allReviews.push(reviewItem);
+  }
+
+  const dataQualityReport = {
+    rowsRead,
+    analysed: validReviews.length,
+    skippedEmpty: skippedReviews.length,
+    duplicates: duplicateReviews.length,
+    unknownRatings: unknownRatingsCount
+  };
+
+  return {
+    validReviews,
+    duplicateReviews,
+    skippedReviews,
+    allReviews,
+    dataQualityReport
+  };
 }
