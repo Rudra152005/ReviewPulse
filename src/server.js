@@ -228,8 +228,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(process.cwd(), 'public', 'index.html'));
 });
 
-// Start server if not imported as a module in tests
-if (process.env.NODE_ENV !== 'test') {
+// Start server if not imported as a module in tests or serverless environments
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`[ReviewLens] Server running at http://localhost:${port}`);
   });
