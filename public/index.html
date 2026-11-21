@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReviewLens – AI Review Insights Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">RL</div>
+        <div>
+          <h1>ReviewLens</h1>
+          <p class="brand-subtitle">AI-powered customer review intelligence & store insights</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnLoadSample" class="btn btn-secondary">
+          <span class="btn-icon">📁</span> Load Sample (reviews.csv)
+        </button>
+        <label class="btn btn-primary" for="fileInput">
+          <span class="btn-icon">⬆️</span> Upload CSV File
+          <input type="file" id="fileInput" accept=".csv" style="display: none;">
+        </label>
+      </div>
+    </header>
+
+    <!-- Global Progress Bar / Banner -->
+    <div id="progressContainer" class="progress-container hidden">
+      <div class="progress-info">
+        <span id="progressText">Analyzing reviews with Gemini AI...</span>
+        <span id="progressPercent" class="progress-percent">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Alert / Status Notice -->
+    <div id="statusAlert" class="alert hidden"></div>
+
+    <!-- Main Dashboard Content -->
+    <main id="dashboardContent" class="dashboard-content hidden">
+      <!-- KPI Metric Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Reviews Analysed</div>
+          <div id="kpiTotal" class="kpi-value">0</div>
+          <div class="kpi-sub" id="kpiTotalSub">Unique customer reviews</div>
+        </div>
+        <div class="kpi-card kpi-positive">
+          <div class="kpi-label">Positive Sentiment</div>
+          <div id="kpiPositive" class="kpi-value">0%</div>
+          <div class="kpi-sub" id="kpiPositiveSub">0 reviews</div>
+        </div>
+        <div class="kpi-card kpi-neutral">
+          <div class="kpi-label">Neutral Sentiment</div>
+          <div id="kpiNeutral" class="kpi-value">0%</div>
+          <div class="kpi-sub" id="kpiNeutralSub">0 reviews</div>
+        </div>
+        <div class="kpi-card kpi-negative">
+          <div class="kpi-label">Negative Sentiment</div>
+          <div id="kpiNegative" class="kpi-value">0%</div>
+          <div class="kpi-sub" id="kpiNegativeSub">0 reviews</div>
+        </div>
+        <div class="kpi-card kpi-warning">
+          <div class="kpi-label">Needs Reply</div>
+          <div id="kpiNeedsReply" class="kpi-value">0</div>
+          <div class="kpi-sub">Unresolved customer issues</div>
+        </div>
+        <div class="kpi-card kpi-info">
+          <div class="kpi-label">Rating Agreement</div>
+          <div id="kpiAgreement" class="kpi-value">0%</div>
+          <div class="kpi-sub" id="kpiMismatchCount">0 mismatches detected</div>
+        </div>
+      </section>
+
+      <!-- Data Quality & Performance Panels -->
+      <section class="panels-grid">
+        <!-- Data Quality Panel -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3>📊 Data Quality Report</h3>
+            <span class="badge badge-subtle">CSV Hygiene</span>
+          </div>
+          <div class="quality-stats-grid">
+            <div class="stat-pill">
+              <span class="stat-pill-label">Rows Read:</span>
+              <strong id="dqRowsRead">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Valid Unique:</span>
+              <strong id="dqAnalysed" class="text-success">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Skipped (Empty):</span>
+              <strong id="dqSkipped" class="text-warning">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Duplicates:</span>
+              <strong id="dqDuplicates" class="text-muted">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Unknown Ratings:</span>
+              <strong id="dqUnknownRatings" class="text-info">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost & Speed Log Panel (Bonus) -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3>⚡ Cost & Speed Telemetry</h3>
+            <span class="badge badge-subtle">Cache & API</span>
+          </div>
+          <div class="quality-stats-grid">
+            <div class="stat-pill">
+              <span class="stat-pill-label">AI Calls Made:</span>
+              <strong id="metricLlmCalls">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Served From Cache:</span>
+              <strong id="metricCacheHits" class="text-success">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Retries / Backoffs:</span>
+              <strong id="metricRetries">0</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Processing Time:</span>
+              <strong id="metricDuration">0s</strong>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Failed Batches:</span>
+              <strong id="metricFailed" class="text-muted">0</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Insights: Top 3 Complaints & Praises -->
+      <section class="insights-grid">
+        <div class="insight-box insight-praises">
+          <div class="insight-header">
+            <span class="insight-icon">🌟</span>
+            <h3>Top 3 Store Praises (What Customers Love)</h3>
+          </div>
+          <ul id="topPraisesList" class="insight-list">
+            <li>Loading praises...</li>
+          </ul>
+        </div>
+        <div class="insight-box insight-complaints">
+          <div class="insight-header">
+            <span class="insight-icon">🚨</span>
+            <h3>Top 3 Store Complaints (Actionable Issues)</h3>
+          </div>
+          <ul id="topComplaintsList" class="insight-list">
+            <li>Loading complaints...</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="tabReviews">Review Table (<span id="tableTabCount">0</span>)</button>
+        <button class="tab-btn" data-tab="tabProducts">Product Breakdown View</button>
+      </div>
+
+      <!-- Tab 1: Filterable Review Table -->
+      <section id="tabReviews" class="tab-content active">
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="filterProduct">Product:</label>
+            <select id="filterProduct" class="filter-select">
+              <option value="ALL">All Products</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterSentiment">Sentiment:</label>
+            <select id="filterSentiment" class="filter-select">
+              <option value="ALL">All Sentiments</option>
+              <option value="positive">Positive</option>
+              <option value="neutral">Neutral</option>
+              <option value="negative">Negative</option>
+              <option value="analysis_failed">Analysis Failed</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterTopic">Topic:</label>
+            <select id="filterTopic" class="filter-select">
+              <option value="ALL">All Topics</option>
+              <option value="quality">Quality</option>
+              <option value="delivery">Delivery</option>
+              <option value="price">Price</option>
+              <option value="packaging">Packaging</option>
+              <option value="support">Support</option>
+              <option value="size_fit">Size & Fit</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterFlag">Flags:</label>
+            <select id="filterFlag" class="filter-select">
+              <option value="ALL">All Flags</option>
+              <option value="needs_reply">Needs Reply</option>
+              <option value="injection">Possible Injection</option>
+              <option value="mismatch">Rating Mismatch</option>
+              <option value="duplicate">Duplicates</option>
+              <option value="failed">Failed Analysis</option>
+            </select>
+          </div>
+
+          <div class="filter-group search-group">
+            <input type="text" id="filterSearch" class="filter-input" placeholder="Search review text or summary...">
+          </div>
+
+          <div class="filter-actions">
+            <button id="btnResetFilters" class="btn btn-subtle">Reset</button>
+          </div>
+        </div>
+
+        <div class="table-meta">
+          <span>Showing <strong id="visibleCount">0</strong> of <strong id="totalRowCount">0</strong> items</span>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">ID</th>
+                <th style="width: 170px;">Product</th>
+                <th style="width: 85px;">Rating</th>
+                <th style="width: 105px;">Sentiment</th>
+                <th style="width: 170px;">Topics</th>
+                <th>Summary & Customer Text</th>
+                <th style="width: 180px;">Status & Flags</th>
+                <th style="width: 130px;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="reviewsTableBody">
+              <tr>
+                <td colspan="8" class="text-center text-muted">No reviews loaded yet. Upload reviews.csv or click "Load Sample".</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tab 2: Product View (Bonus) -->
+      <section id="tabProducts" class="tab-content">
+        <div id="productCardsGrid" class="product-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Empty Initial State Placeholder -->
+    <div id="emptyState" class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h2>Welcome to ReviewLens</h2>
+      <p>Upload a product reviews CSV file or load the built-in 30-review sample dataset to analyze sentiment, detect prompt injection, identify SARCASTIC feedback, and generate suggested customer replies.</p>
+      <div class="empty-state-actions">
+        <button id="btnEmptySample" class="btn btn-primary btn-large">Load Sample Dataset (reviews.csv)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Suggested Reply -->
+  <div id="replyModal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalTitle">Suggested Customer Reply</h3>
+        <button id="modalCloseBtn" class="modal-close-icon">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-review-summary">
+          <div><strong id="modalReviewId"></strong> – <span id="modalProduct"></span></div>
+          <div id="modalSummary" class="text-muted mt-1"></div>
+        </div>
+        <div class="reply-container">
+          <label class="reply-label">AI Suggested Reply (Polite, Non-committal, English):</label>
+          <textarea id="modalReplyText" class="reply-textarea" readonly rows="5"></textarea>
+          <div id="modalReplyMeta" class="reply-meta-tag"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCopyBtn" class="btn btn-primary">
+          <span id="copyBtnIcon">📋</span> Copy Reply
+        </button>
+        <button id="modalCancelBtn" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
