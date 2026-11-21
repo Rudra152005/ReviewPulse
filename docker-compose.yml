@@ -1,0 +1,12 @@
+services:
+  reviewlens:
+    build: .
+    container_name: reviewlens-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      # Persist the cache.json file across container restarts
+      - ./data:/app/data
+    restart: unless-stopped
