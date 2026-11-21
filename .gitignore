@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+
+# Environment secrets
+.env
+.env.local
+
+# Cache data
+data/*.json
+!data/.gitkeep
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Logs and OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
