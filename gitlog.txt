@@ -1,0 +1,107 @@
+﻿commit 54513025af4cf845fc9e8411677d37ade8e33491
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:12:24 +0530
+
+    docs: add gitlog.txt
+
+commit dfc41bc224363082580fe9bc4b69a2d5956d4212
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:11:54 +0530
+
+    test: add end-to-end integration test
+
+commit 4dbc61bfbd5b0d9eee4898a586524aaad902cb80
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:09:26 +0530
+
+    docs: README
+
+commit 747d44100fca9ca61167acc5fdacc0a5e658f7b4
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:08:39 +0530
+
+    feat(bonus): rating mismatch, cost/speed log
+
+commit 3a8f93870e4ebefec79f4cfa97489d1b00c4d992
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:07:38 +0530
+
+    test: add automated tests
+
+commit 2a5bd7bc0e9722fa63c1a6b4ec6d6d09a415b3a0
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:05:38 +0530
+
+    feat: on-click suggested replies
+
+commit 2d62bff893acc8989801faf6d9ad052ea12152bf
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:05:21 +0530
+
+    feat: top complaints/praises
+
+commit 37bb55ac15b895c6a18b1d935e6b0ceee60486ad
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:05:06 +0530
+
+    feat: filters
+
+commit e187c2c8b5d4576a8d3eae5acb7acdf4cf8e5f3c
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:04:52 +0530
+
+    feat: dashboard summary cards and review table
+
+commit af2ef54f8cbca9fb5df16b61a17e5826536cc574
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:00:56 +0530
+
+    feat: hash-based result cache
+
+commit e98f26cb319486fd7ca9c6b764dd995546726476
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 10:00:29 +0530
+
+    feat: batching pipeline
+
+commit 630c4fb581a76df12ceb2346567e89e50c52b917
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:59:14 +0530
+
+    feat: response validator and retry-once logic
+
+commit ff149cfbb0faea7092378c3f02a862947f42d24d
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:57:06 +0530
+
+    feat: prompt design with injection resistance
+
+commit 3531fcf00986d073d34e8cbb3ea4f80332e04ae6
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:56:01 +0530
+
+    feat: LLM client with exponential backoff
+
+commit 4abb7b649f6713f092060cdb85b1c2931a6dd9af
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:55:20 +0530
+
+    feat: duplicate detection and data quality report
+
+commit 8b34ca6e145d1863601124a737c7ae760172be34
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:54:33 +0530
+
+    feat: CSV parsing and cleaning
+
+commit a2f8c1fcdc959d1184e4e7335ddf8dc9bc7f09c0
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:48:06 +0530
+
+    feat: add sample dataset reviews.csv
+
+commit 3bc69f83f49544d7ae5c8b96e83eddaa6aa96cdd
+Author: Rudra152005 <www.rudra152005@gmail.com>
+Date:   2026-11-21 09:47:22 +0530
+
+    chore: init project, .gitignore, .env.example
